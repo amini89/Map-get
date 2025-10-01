@@ -2,26 +2,27 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>🌍 داشبورد - ردیابی مکان</title>
+    <title>🌍 داشبورد - مکان‌های دقیق</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; }
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
         #map { height: 100vh; width: 100%; }
         .header {
             position: absolute;
             top: 15px;
-            right: 15px;
+            left: 15px;
             background: white;
             padding: 10px 15px;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             z-index: 1000;
-            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #0078d7;
         }
     </style>
 </head>
 <body>
-    <div class="header">📡 مکان‌های دریافتی (به‌روزرسانی خودکار)</div>
+    <div class="header">📡 مکان‌های دقیق ارسال‌شده (GPS)</div>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -41,17 +42,22 @@
                     markers.forEach(m => map.removeLayer(m));
                     markers.length = 0;
 
-                    points.forEach(p => {
+                    points.forEach((p, i) => {
                         const marker = L.marker([p.lat, p.lng])
                             .addTo(map)
-                            .bindPopup(p.info);
+                            .bindPopup(`نفر ${i + 1}<br>عرض: ${p.lat.toFixed(4)}<br>طول: ${p.lng.toFixed(4)}`);
                         markers.push(marker);
                     });
+
+                    if (points.length > 0) {
+                        const group = L.featureGroup(markers);
+                        map.fitBounds(group.getBounds().pad(0.2));
+                    }
                 });
         }
 
         update();
-        setInterval(update, 4000); // هر ۴ ثانیه بروزرسانی
+        setInterval(update, 3000); // هر ۳ ثانیه بروزرسانی
     </script>
 </body>
 </html>
