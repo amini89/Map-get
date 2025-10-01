@@ -2,30 +2,31 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>🌍 پنل کلاسی - نقشه زنده</title>
+    <title>🌍 داشبورد - ردیابی مکان</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { margin: 0; padding: 0; }
         #map { height: 100vh; width: 100%; }
         .header {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            right: 15px;
             background: white;
             padding: 10px 15px;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             z-index: 1000;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <div class="header">📡 پروژه آموزشی - مکان‌های ارسال‌شده (به‌روزرسانی هر ۵ ثانیه)</div>
+    <div class="header">📡 مکان‌های دریافتی (به‌روزرسانی خودکار)</div>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([35.6892, 51.3890], 6); // مرکز ایران
+        const map = L.map('map').setView([32.4279, 53.6880], 5); // مرکز ایران
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
@@ -33,31 +34,24 @@
 
         const markers = [];
 
-        function updateMap() {
+        function update() {
             fetch('/data')
                 .then(res => res.json())
                 .then(points => {
-                    // پاک کردن مارکرهای قبلی
-                    markers.forEach(marker => map.removeLayer(marker));
+                    markers.forEach(m => map.removeLayer(m));
                     markers.length = 0;
 
-                    // اضافه کردن مارکرهای جدید
-                    points.forEach((point, i) => {
-                        const marker = L.marker([point.lat, point.lng])
+                    points.forEach(p => {
+                        const marker = L.marker([p.lat, p.lng])
                             .addTo(map)
-                            .bindPopup(`نفر ${i + 1}<br>عرض: ${point.lat.toFixed(4)}<br>طول: ${point.lng.toFixed(4)}`);
+                            .bindPopup(p.info);
                         markers.push(marker);
                     });
-
-                    if (points.length > 0) {
-                        const group = new L.featureGroup(markers);
-                        map.fitBounds(group.getBounds().pad(0.2));
-                    }
                 });
         }
 
-        updateMap();
-        setInterval(updateMap, 5000); // هر ۵ ثانیه بروزرسانی
+        update();
+        setInterval(update, 4000); // هر ۴ ثانیه بروزرسانی
     </script>
 </body>
 </html>
